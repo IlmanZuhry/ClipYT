@@ -1,12 +1,87 @@
+# =============================================================================
+# ClipYT - .gitignore (Tauri 2 + Rust + Android)
+# Taruh file ini di ROOT project (sejajar dengan package.json).
+# =============================================================================
+
+# --- Kunci & rahasia (JANGAN PERNAH di-commit) --------------------------------
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+keystore.properties
+key.properties
+.env
+.env.*
+!.env.example
+secrets/
+cookies.txt
+
+# --- Hasil build & paket rilis ------------------------------------------------
+*.apk
+*.apk.idsig
+*.aab
+*.msi
+*.exe
+*.dmg
+*.app
+*.AppImage
+*.deb
+*.rpm
+
+# --- Node ---------------------------------------------------------------------
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
 
+# --- Rust / Tauri -------------------------------------------------------------
 src-tauri/target/
+/target/
+src-tauri/gen/schemas/
 
-src-tauri/gen/
+# Biner sidecar yang besar (yt-dlp, ffmpeg). Unduh sendiri sesuai platform.
+src-tauri/binaries/
 
-src-tauri/binaries/*.exe
+# libffmpeg.so untuk Android (besar, ditaruh manual)
+src-tauri/gen/android/app/src/main/jniLibs/
+
+# CATATAN: src-tauri/gen/android/ SENGAJA tidak diabaikan seluruhnya.
+# Di dalamnya ada kustomisasi kamu (AndroidManifest.xml, build.gradle.kts,
+# useLegacyPackaging, dll). Tauri sudah membuat .gitignore sendiri di dalam
+# folder itu untuk file yang digenerate (tauri.properties, build/, dsb).
+
+# --- Android / Gradle (jaring pengaman tambahan) -----------------------------
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# --- Hasil pengujian & file sementara ----------------------------------------
+test_*.mp4
+*.part
+*.ytdl
+*.tmp
+*.temp
+*.log
+logs/
+
+# --- Sistem operasi -----------------------------------------------------------
 .DS_Store
 Thumbs.db
-*.log
+desktop.ini
+ehthumbs.db
+
+# --- Editor -------------------------------------------------------------------
 .vscode/*
 !.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
