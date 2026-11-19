@@ -54,6 +54,16 @@ function syncRangesFromTimes() {
   updateDuration();
 }
 
+async function showPopup(title, body, kind = "info") {
+  try {
+    if (window.__TAURI__?.dialog?.message) {
+      await window.__TAURI__.dialog.message(body, { title, kind });
+    }
+  } catch (_) {
+    // Abaikan jika dialog gagal dipanggil agar aplikasi tidak macet
+  }
+}
+
 function setStatus(message, isError = false) {
   statusText.textContent = message;
   statusText.style.color = isError ? "#bf2522" : "";
@@ -61,7 +71,11 @@ function setStatus(message, isError = false) {
 
 async function loadVideo() {
   const url = videoUrl.value.trim();
-  if (!url) return setStatus("Masukkan tautan video terlebih dahulu.", true);
+  if (!url) {
+    const msg = "Masukkan tautan video terlebih dahulu.";
+    setStatus(msg, true);
+    return showPopup("Tautan Kosong", msg, "warning");
+  }
   loadButton.disabled = true;
   setStatus("Membaca informasi video...");
   try {
@@ -85,7 +99,9 @@ async function loadVideo() {
     setStatus("Video siap. Atur rentang clip Anda.");
   } catch (error) {
     downloadButton.disabled = true;
-    setStatus(typeof error === "string" ? error : (error.message || "Video tidak dapat dimuat."), true);
+    const errMsg = typeof error === "string" ? error : (error.message || "Video tidak dapat dimuat.");
+    setStatus(errMsg, true);
+    await showPopup("Gagal Memuat Video", errMsg, "error");
   } finally {
     loadButton.disabled = false;
   }
@@ -95,7 +111,9 @@ async function downloadClip() {
   const start = toSeconds(startTime.value);
   const end = toSeconds(endTime.value);
   if (!videoDuration || !Number.isFinite(start) || !Number.isFinite(end) || end <= start || end > videoDuration) {
-    return setStatus("Periksa kembali waktu mulai dan berakhir clip.", true);
+    const msg = "Periksa kembali waktu mulai dan berakhir clip.";
+    setStatus(msg, true);
+    return showPopup("Waktu Tidak Valid", msg, "warning");
   }
 
   downloadButton.disabled = true;
@@ -122,9 +140,14 @@ async function downloadClip() {
       endSeconds: Math.floor(end),
       outputPath,
     });
+
+    const successMsg = `Clip berhasil disimpan ke:\n${outputPath}`;
     setStatus(`Clip selesai disimpan ke: ${outputPath}`);
+    await showPopup("Berhasil", successMsg, "info");
   } catch (error) {
-    setStatus(typeof error === "string" ? error : (error.message || "Clip gagal dibuat."), true);
+    const errMsg = typeof error === "string" ? error : (error.message || "Clip gagal dibuat.");
+    setStatus(errMsg, true);
+    await showPopup("Gagal Membuat Clip", errMsg, "error");
   } finally {
     downloadButton.disabled = false;
   }
