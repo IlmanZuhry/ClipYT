@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClipYT - Potong Video YouTube</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="ClipYT beranda"><span>Clip</span>YT</a>
+      <p>Potong momen yang Anda butuhkan.</p>
+    </header>
+
+    <main class="workspace">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">YouTube clip maker</p>
+        <h1 id="page-title">Pilih bagian video, lalu unduh.</h1>
+        <p>Masukkan tautan video YouTube dan tentukan waktu mulai serta berakhirnya clip.</p>
+      </section>
+
+      <section class="editor" aria-label="Editor clip">
+        <div class="url-row">
+          <label for="video-url">Tautan video YouTube</label>
+          <div class="url-controls">
+            <input id="video-url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="url" />
+            <button id="load-video" type="button">Muat video</button>
+          </div>
+        </div>
+
+        <div id="video-panel" class="video-panel is-hidden" aria-live="polite">
+          <img id="thumbnail" alt="Thumbnail video" />
+          <div class="video-details">
+            <p class="detail-label">Video terpilih</p>
+            <h2 id="video-title"></h2>
+            <p id="video-uploader"></p>
+            <p id="video-duration"></p>
+          </div>
+        </div>
+
+        <div class="clip-controls">
+          <div class="time-field">
+            <label for="start-time">Mulai</label>
+            <input id="start-time" type="text" inputmode="numeric" value="00:00:00" aria-describedby="time-help" />
+          </div>
+          <div class="time-field">
+            <label for="end-time">Berakhir</label>
+            <input id="end-time" type="text" inputmode="numeric" value="00:00:30" aria-describedby="time-help" />
+          </div>
+          <div class="duration-readout">
+            <span>Durasi clip</span>
+            <strong id="selected-duration">00:30</strong>
+          </div>
+        </div>
+        <p id="time-help" class="helper-text">Gunakan format SS, MM:SS, atau HH:MM:SS. Maksimal 60 menit.</p>
+
+        <div class="timeline-wrap">
+          <div class="timeline-labels"><span id="timeline-start">00:00</span><span id="timeline-end">Belum dimuat</span></div>
+          <div class="range-stack">
+            <input id="start-range" type="range" min="0" max="30" value="0" step="1" aria-label="Waktu mulai" />
+            <input id="end-range" type="range" min="0" max="30" value="30" step="1" aria-label="Waktu berakhir" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <p id="status" role="status">Masukkan tautan untuk memulai.</p>
+          <button id="download-clip" class="primary-action" type="button" disabled>Unduh clip MP4</button>
+        </div>
+        
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
