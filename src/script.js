@@ -1,5 +1,4 @@
 const { invoke } = window.__TAURI__.core;
-const { save } = window.__TAURI__.dialog;
 
 const videoUrl = document.querySelector("#video-url");
 const loadButton = document.querySelector("#load-video");
@@ -11,6 +10,8 @@ const endRange = document.querySelector("#end-range");
 const statusText = document.querySelector("#status");
 const selectedDuration = document.querySelector("#selected-duration");
 const timelineEnd = document.querySelector("#timeline-end");
+
+const isAndroid = /Android/i.test(navigator.userAgent);
 
 let videoDuration = null;
 let currentVideoTitle = "youtube-clip";
@@ -60,7 +61,7 @@ async function showPopup(title, body, kind = "info") {
       await window.__TAURI__.dialog.message(body, { title, kind });
     }
   } catch (_) {
-    // Abaikan jika dialog gagal dipanggil agar aplikasi tidak macet
+    // Abaikan jika dialog tidak didukung di platform tertentu
   }
 }
 
@@ -118,31 +119,36 @@ async function downloadClip() {
 
   downloadButton.disabled = true;
   try {
-    const startLabel = formatTime(start, true).replace(/:/g, "-");
-    const endLabel = formatTime(end, true).replace(/:/g, "-");
-    const defaultFileName = `${currentVideoTitle} (${startLabel} - ${endLabel}).mp4`;
+    let outputPath = "";
 
-    setStatus("Membuka dialog penyimpanan...");
-    const outputPath = await window.__TAURI__.dialog.save({
-      defaultPath: defaultFileName,
-      filters: [{ name: "Video MP4", extensions: ["mp4"] }],
-    });
+    if (!isAndroid) {
+      const startLabel = formatTime(start, true).replace(/:/g, "-");
+      const endLabel = formatTime(end, true).replace(/:/g, "-");
+      const defaultFileName = `${currentVideoTitle} (${startLabel} - ${endLabel}).mp4`;
 
-    if (!outputPath) {
-      setStatus("Penyimpanan dibatalkan.");
-      return;
+      setStatus("Membuka dialog penyimpanan...");
+      outputPath = await window.__TAURI__.dialog.save({
+        defaultPath: defaultFileName,
+        filters: [{ name: "Video MP4", extensions: ["mp4"] }],
+      });
+
+      if (!outputPath) {
+        setStatus("Penyimpanan dibatalkan.");
+        return;
+      }
     }
 
     setStatus("Membuat clip. Proses ini bergantung pada panjang dan format video...");
-    await invoke("download_clip", {
+    const savedPath = await invoke("download_clip", {
       url: videoUrl.value.trim(),
       startSeconds: Math.floor(start),
       endSeconds: Math.floor(end),
       outputPath,
     });
 
-    const successMsg = `Clip berhasil disimpan ke:\n${outputPath}`;
-    setStatus(`Clip selesai disimpan ke: ${outputPath}`);
+    const finalLocation = savedPath || outputPath;
+    const successMsg = `Clip berhasil disimpan ke:\n${finalLocation}`;
+    setStatus(`Clip selesai disimpan ke: ${finalLocation}`);
     await showPopup("Berhasil", successMsg, "info");
   } catch (error) {
     const errMsg = typeof error === "string" ? error : (error.message || "Clip gagal dibuat.");
